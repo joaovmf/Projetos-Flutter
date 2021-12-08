@@ -2,9 +2,16 @@
 import 'package:flutter/material.dart';
 import './contact_form.dart';
 import '../models/contact.dart';
-import '../database/app_database.dart';
+import '../database/dao/contact_dao.dart';
 
-class ContactsList extends StatelessWidget {
+class ContactList extends StatefulWidget {
+  @override
+  _ContactListState createState() => _ContactListState();
+}
+
+class _ContactListState extends State<ContactList> {
+  final ContactDao _dao = ContactDao();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -13,8 +20,7 @@ class ContactsList extends StatelessWidget {
       ),
       body: FutureBuilder<List<Contact>>(
           initialData: [],
-          future:
-            findAll(),
+          future: _dao.findAll(),
           builder: (context, snapshot) {
             switch (snapshot.connectionState) {
               case ConnectionState.waiting:
@@ -22,12 +28,11 @@ class ContactsList extends StatelessWidget {
                     child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
+                  children: const <Widget>[
                     CircularProgressIndicator(),
                     Text('Loading...')
                   ],
                 ));
-                break;
               case ConnectionState.done:
                 final List<Contact> contacts = snapshot.data as List<Contact>;
                 return ListView.builder(
@@ -37,21 +42,16 @@ class ContactsList extends StatelessWidget {
                   },
                   itemCount: contacts.length,
                 );
-                break;
             }
             return Text('Unknown error.');
           }),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.of(context)
-              .push(
-                MaterialPageRoute(
-                  builder: (context) => ContactForm(),
-                ),
-              )
-              .then(
-                (newContact) => debugPrint(newContact.toString()),
-              );
+              .push(MaterialPageRoute(builder: (context) => ContactForm()))
+              .then((value) => setState(() {
+                    widget.createState();
+                  }));
         },
         child: const Icon(Icons.add),
       ),
