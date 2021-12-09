@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import './contact_form.dart';
 import '../models/contact.dart';
 import '../database/dao/contact_dao.dart';
-
+import '../components/progress.dart';
+import '../components/centered_message.dart';
 class ContactList extends StatefulWidget {
   @override
   _ContactListState createState() => _ContactListState();
@@ -25,26 +26,22 @@ class _ContactListState extends State<ContactList> {
           builder: (context, snapshot) {
             switch (snapshot.connectionState) {
               case ConnectionState.waiting:
-                return Center(
-                    child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: const <Widget>[
-                    CircularProgressIndicator(),
-                    Text('Loading...')
-                  ],
-                ));
+                return Progress();
               case ConnectionState.done:
                 final List<Contact> contacts = snapshot.data as List<Contact>;
-                return ListView.builder(
+                if (contacts.isNotEmpty) {
+                  return ListView.builder(
                   itemBuilder: (context, index) {
                     final Contact contact = contacts[index];
                     return _ContactItem(contact);
                   },
                   itemCount: contacts.length,
                 );
+                }
+               return CenteredMessage('No transactions found',
+                  icon: Icons.warning, iconSize: 30.0, fontSize: 24.0);
             }
-            return Text('Unknown error.');
+            return CenteredMessage('Unknown error');
           }),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
