@@ -5,6 +5,8 @@ import '../models/contact.dart';
 import '../database/dao/contact_dao.dart';
 import '../components/progress.dart';
 import '../components/centered_message.dart';
+import './transaction_form.dart';
+
 class ContactList extends StatefulWidget {
   @override
   _ContactListState createState() => _ContactListState();
@@ -31,15 +33,21 @@ class _ContactListState extends State<ContactList> {
                 final List<Contact> contacts = snapshot.data as List<Contact>;
                 if (contacts.isNotEmpty) {
                   return ListView.builder(
-                  itemBuilder: (context, index) {
-                    final Contact contact = contacts[index];
-                    return _ContactItem(contact);
-                  },
-                  itemCount: contacts.length,
-                );
+                    itemBuilder: (context, index) {
+                      final Contact contact = contacts[index];
+                      return _ContactItem(contact, onClick: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => TransactionForm(contact),
+                          ),
+                        );
+                      });
+                    },
+                    itemCount: contacts.length,
+                  );
                 }
-               return CenteredMessage('No transactions found',
-                  icon: Icons.warning, iconSize: 30.0, fontSize: 24.0);
+                return CenteredMessage('No transactions found',
+                    icon: Icons.warning, iconSize: 30.0, fontSize: 24.0);
             }
             return CenteredMessage('Unknown error');
           }),
@@ -59,13 +67,15 @@ class _ContactListState extends State<ContactList> {
 
 class _ContactItem extends StatelessWidget {
   final Contact contact;
+  final Function onClick;
 
-  _ContactItem(this.contact);
+  _ContactItem(this.contact, {required this.onClick});
 
   @override
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
+        onTap: () => onClick(),
         title: Text(contact.name,
             style: TextStyle(
               fontSize: 24.0,
