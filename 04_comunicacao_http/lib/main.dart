@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import './screens/dashboard.dart';
-import 'http/web_client.dart';
-import './models/contact.dart';
-import './models/transaction.dart';
+import './components/transaction_auth_dialog.dart';
 
 void main() { 
   runApp(BytebankApp());

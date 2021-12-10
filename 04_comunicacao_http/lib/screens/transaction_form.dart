@@ -1,3 +1,4 @@
+import 'package:comunicacao_http/components/transaction_auth_dialog.dart';
 import 'package:flutter/material.dart';
 import '../models/contact.dart';
 import '../models/transaction.dart';
@@ -63,11 +64,14 @@ class _TransactionFormState extends State<TransactionForm> {
                       final double value = double.parse(_valueController.text);
                       final transactionCreated =
                           Transaction(value, widget.contact);
-                      _webClient.save(transactionCreated).then((transaction) {
-                        if (transaction != null) {
-                          Navigator.pop(context);
-                        }
-                      });
+                      showDialog(
+                        context: context,
+                        builder: (contextDialog) => TransactionAuthDialog(
+                          onConfirm: (String password) {
+                            _save(transactionCreated, password, context);
+                          },
+                        ),
+                      );
                     },
                   ),
                 ),
@@ -78,4 +82,14 @@ class _TransactionFormState extends State<TransactionForm> {
       ),
     );
   }
+}
+
+void _save(Transaction transactionCreated,  String password, BuildContext context) async {
+
+  final TransactionWebClient _webClient = TransactionWebClient();
+  _webClient.save(transactionCreated, password).then((transaction) {
+    if (transaction != null) {
+      Navigator.pop(context);
+    }
+  });
 }
