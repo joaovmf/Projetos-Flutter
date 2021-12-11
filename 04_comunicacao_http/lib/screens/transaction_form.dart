@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/contact.dart';
 import '../models/transaction.dart';
 import '../http/webclients/transaction_webclient.dart';
+import '../components/response_dialog.dart';
 
 class TransactionForm extends StatefulWidget {
   final Contact contact;
@@ -84,12 +85,23 @@ class _TransactionFormState extends State<TransactionForm> {
   }
 }
 
-void _save(Transaction transactionCreated,  String password, BuildContext context) async {
-
+void _save(Transaction transactionCreated, String password,
+    BuildContext context) async {
   final TransactionWebClient _webClient = TransactionWebClient();
-  _webClient.save(transactionCreated, password).then((transaction) {
-    if (transaction != null) {
-      Navigator.pop(context);
-    }
-  });
+  final Transaction transaction = await _webClient.save(transactionCreated, password).catchError((e) {
+    showDialog(
+        context: context,
+        builder: (contextDialog) {
+          return FailureDialog(e.message);
+        });
+  }, test: (e) => e is Exception);
+
+  if (transaction != null) {
+    await showDialog(
+        context: context,
+        builder: (contextDialog) {
+          return SuccessDialog('successful transaction');
+        });
+    Navigator.pop(context);
+  }
 }
