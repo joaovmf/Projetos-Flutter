@@ -4,6 +4,7 @@ import '../models/contact.dart';
 import '../models/transaction.dart';
 import '../http/webclients/transaction_webclient.dart';
 import '../components/response_dialog.dart';
+import 'package:uuid/uuid.dart';
 
 class TransactionForm extends StatefulWidget {
   final Contact contact;
@@ -17,9 +18,11 @@ class TransactionForm extends StatefulWidget {
 class _TransactionFormState extends State<TransactionForm> {
   final TextEditingController _valueController = TextEditingController();
   final TransactionWebClient _webClient = TransactionWebClient();
+  final String transactionId = Uuid().v4();
 
   @override
   Widget build(BuildContext context) {
+    print('transaction id: $transactionId');
     return Scaffold(
       appBar: AppBar(
         title: Text('New transaction'),
@@ -64,7 +67,7 @@ class _TransactionFormState extends State<TransactionForm> {
                     onPressed: () {
                       final double value = double.parse(_valueController.text);
                       final transactionCreated =
-                          Transaction(value, widget.contact);
+                          Transaction(transactionId, value, widget.contact);
                       showDialog(
                         context: context,
                         builder: (contextDialog) => TransactionAuthDialog(

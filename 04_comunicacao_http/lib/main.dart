@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import './screens/dashboard.dart';
-import './components/transaction_auth_dialog.dart';
+
 
 void main() { 
   runApp(BytebankApp());
