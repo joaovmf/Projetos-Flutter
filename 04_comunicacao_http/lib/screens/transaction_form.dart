@@ -85,23 +85,50 @@ class _TransactionFormState extends State<TransactionForm> {
   }
 }
 
-void _save(Transaction transactionCreated, String password,
-    BuildContext context) async {
-  final TransactionWebClient _webClient = TransactionWebClient();
-  final Transaction transaction = await _webClient.save(transactionCreated, password).catchError((e) {
+ void _save(
+    Transaction transactionCreated,
+    String password,
+    BuildContext context,
+  ) async {
+    Transaction transaction = await _send(
+      transactionCreated,
+      password,
+      context,
+    );
+    _showSuccessfulMessage(transaction, context);
+  }
+
+Future _showSuccessfulMessage(
+      Transaction transaction, BuildContext context) async {
+    if (transaction != null) {
+      await showDialog(
+          context: context,
+          builder: (contextDialog) {
+            return SuccessDialog('successful transaction');
+          });
+      Navigator.pop(context);
+    }
+  }
+
+  Future<Transaction> _send(Transaction transactionCreated, String password,
+      BuildContext context) async {
+        final TransactionWebClient _webClient = TransactionWebClient();
+    final Transaction transaction =
+        await _webClient.save(transactionCreated, password).catchError((e) {
+      _showFailureMessage(context, message: e.message);
+    }, test: (e) => e is HttpException);
+    return transaction;
+  }
+
+  void _showFailureMessage(
+    BuildContext context, {
+    String message = 'Unknown error',
+  }) {
     showDialog(
         context: context,
         builder: (contextDialog) {
-          return FailureDialog(e.message);
+          return FailureDialog(message);
         });
-  }, test: (e) => e is Exception);
-
-  if (transaction != null) {
-    await showDialog(
-        context: context,
-        builder: (contextDialog) {
-          return SuccessDialog('successful transaction');
-        });
-    Navigator.pop(context);
   }
-}
+
+
