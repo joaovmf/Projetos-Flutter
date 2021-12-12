@@ -1,4 +1,4 @@
-import 'package:comunicacao_http/components/transaction_auth_dialog.dart';
+import 'package:crashlytics/components/transaction_auth_dialog.dart'; 
 import 'package:flutter/material.dart';
 import '../models/contact.dart';
 import '../models/transaction.dart';
