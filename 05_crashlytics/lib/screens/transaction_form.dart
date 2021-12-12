@@ -1,10 +1,13 @@
-import 'package:crashlytics/components/transaction_auth_dialog.dart'; 
+import 'dart:async';
+
+import 'package:alura_crashlytics/components/progress.dart';
+import 'package:alura_crashlytics/components/response_dialog.dart';
+import 'package:alura_crashlytics/components/transaction_auth_dialog.dart';
+import 'package:alura_crashlytics/http/webclients/transaction_webclient.dart';
+import 'package:alura_crashlytics/models/contact.dart';
+import 'package:alura_crashlytics/models/transaction.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
-import '../models/contact.dart';
-import '../models/transaction.dart';
-import '../http/webclients/transaction_webclient.dart';
-import '../components/response_dialog.dart';
-import '../components/progress.dart';
 import 'package:uuid/uuid.dart';
 
 class TransactionForm extends StatefulWidget {
@@ -24,7 +27,6 @@ class _TransactionFormState extends State<TransactionForm> {
 
   @override
   Widget build(BuildContext context) {
-    print('transaction id: $transactionId');
     return Scaffold(
       appBar: AppBar(
         title: Text('New transaction'),
@@ -38,7 +40,9 @@ class _TransactionFormState extends State<TransactionForm> {
               Visibility(
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Progress(message: 'sending...'),
+                  child: Progress(
+                    message: 'Sending...',
+                  ),
                 ),
                 visible: _sending,
               ),
@@ -71,20 +75,25 @@ class _TransactionFormState extends State<TransactionForm> {
                 padding: const EdgeInsets.only(top: 16.0),
                 child: SizedBox(
                   width: double.maxFinite,
-                  child: ElevatedButton(
+                  child: RaisedButton(
                     child: Text('Transfer'),
                     onPressed: () {
-                      final double value = double.parse(_valueController.text);
-                      final transactionCreated =
-                          Transaction(transactionId, value, widget.contact);
-                      showDialog(
-                        context: context,
-                        builder: (contextDialog) => TransactionAuthDialog(
-                          onConfirm: (String password) {
-                            _save(transactionCreated, password, context);
-                          },
-                        ),
+                      final double value =
+                          double.tryParse(_valueController.text);
+                      final transactionCreated = Transaction(
+                        transactionId,
+                        value,
+                        widget.contact,
                       );
+                      showDialog(
+                          context: context,
+                          builder: (contextDialog) {
+                            return TransactionAuthDialog(
+                              onConfirm: (String password) {
+                                _save(transactionCreated, password, context);
+                              },
+                            );
+                          });
                     },
                   ),
                 ),
@@ -101,17 +110,11 @@ class _TransactionFormState extends State<TransactionForm> {
     String password,
     BuildContext context,
   ) async {
-    setState(() {
-      _sending = true;
-    });
     Transaction transaction = await _send(
       transactionCreated,
       password,
       context,
     );
-    setState(() {
-      _sending = false;
-    });
     _showSuccessfulMessage(transaction, context);
   }
 
@@ -129,11 +132,42 @@ class _TransactionFormState extends State<TransactionForm> {
 
   Future<Transaction> _send(Transaction transactionCreated, String password,
       BuildContext context) async {
-    final TransactionWebClient _webClient = TransactionWebClient();
+    setState(() {
+      _sending = true;
+    });
     final Transaction transaction =
-        await _webClient.save(transactionCreated, password).catchError((e) {
+    await _webClient.save(transactionCreated, password).catchError((e) {
+
+      if (FirebaseCrashlytics.instance.isCrashlyticsCollectionEnabled) {
+        FirebaseCrashlytics.instance.setCustomKey('exeption', e.toString());
+        FirebaseCrashlytics.instance.setCustomKey('http_body', transactionCreated.toString());
+        FirebaseCrashlytics.instance.recordError(e, null);
+      }
       _showFailureMessage(context, message: e.message);
-    }, test: (e) => e is HttpException);
+    }, test: (e) => e is HttpException).catchError((e) {
+
+      if (FirebaseCrashlytics.instance.isCrashlyticsCollectionEnabled) {
+        FirebaseCrashlytics.instance.setCustomKey('exeption', e.toString());
+        FirebaseCrashlytics.instance.setCustomKey('http_code', e.statusCode);
+        FirebaseCrashlytics.instance.setCustomKey('http_body', transactionCreated.toString());
+        FirebaseCrashlytics.instance.recordError(e, null);
+      }
+      _showFailureMessage(context,
+          message: 'timeout submitting the transaction');
+    }, test: (e) => e is TimeoutException).catchError((e) {
+
+      if (FirebaseCrashlytics.instance.isCrashlyticsCollectionEnabled) {
+        FirebaseCrashlytics.instance.setCustomKey('exeption', e.toString());
+        FirebaseCrashlytics.instance.setCustomKey('http_body', transactionCreated.toString());
+        FirebaseCrashlytics.instance.recordError(e, null);
+      }
+
+      _showFailureMessage(context);
+    }).whenComplete(() {
+      setState(() {
+        _sending = false;
+      });
+    });
     return transaction;
   }
 

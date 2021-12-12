@@ -3,15 +3,19 @@ class Contact {
   final String name;
   final int accountNumber;
 
-  Contact(this.id, this.name, this.accountNumber);
+  Contact(
+    this.id,
+    this.name,
+    this.accountNumber,
+  );
 
-  @override 
+  @override
   String toString() {
     return 'Contact{id: $id, name: $name, accountNumber: $accountNumber}';
   }
 
-   Contact.fromJson(Map<String, dynamic> json)
-      : id = json['id'] ?? 0,
+  Contact.fromJson(Map<String, dynamic> json)
+      : id = json['id'],
         name = json['name'],
         accountNumber = json['accountNumber'];
 

@@ -1,8 +1,8 @@
+import 'package:alura_crashlytics/components/centered_message.dart';
+import 'package:alura_crashlytics/components/progress.dart';
+import 'package:alura_crashlytics/http/webclients/transaction_webclient.dart';
+import 'package:alura_crashlytics/models/transaction.dart';
 import 'package:flutter/material.dart';
-import '../models/transaction.dart';
-import '../components/progress.dart';
-import '../components/centered_message.dart';
-import '../http/webclients/transaction_webclient.dart';
 
 class TransactionsList extends StatelessWidget {
 
@@ -26,9 +26,8 @@ class TransactionsList extends StatelessWidget {
             case ConnectionState.active:
               break;
             case ConnectionState.done:
-              if (snapshot.hasData) {
-                final List<Transaction> transactions =
-                    snapshot.data as List<Transaction>;
+              if(snapshot.hasData){
+                final List<Transaction> transactions = snapshot.data;
                 if (transactions.isNotEmpty) {
                   return ListView.builder(
                     itemBuilder: (context, index) {
@@ -36,11 +35,13 @@ class TransactionsList extends StatelessWidget {
                       return Card(
                         child: ListTile(
                           leading: Icon(Icons.monetization_on),
-                          title: Text(transaction.value.toString(),
-                              style: TextStyle(
-                                fontSize: 24.0,
-                                fontWeight: FontWeight.bold,
-                              )),
+                          title: Text(
+                            transaction.value.toString(),
+                            style: TextStyle(
+                              fontSize: 24.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           subtitle: Text(
                             transaction.contact.accountNumber.toString(),
                             style: TextStyle(
@@ -54,11 +55,14 @@ class TransactionsList extends StatelessWidget {
                   );
                 }
               }
-              return CenteredMessage('No transactions found',
-                  icon: Icons.warning, iconSize: 30.0, fontSize: 24.0);
+              return CenteredMessage(
+                'No transactions found',
+                icon: Icons.warning,
+              );
               break;
           }
-          return CenteredMessage('Unknown error', icon: Icons.warning, iconSize: 30.0, fontSize: 24.0);
+
+          return CenteredMessage('Unknown error');
         },
       ),
     );

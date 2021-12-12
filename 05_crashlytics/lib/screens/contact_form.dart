@@ -1,7 +1,6 @@
-// ignore_for_file: prefer_const_constructors
+import 'package:alura_crashlytics/database/dao/contact_dao.dart';
+import 'package:alura_crashlytics/models/contact.dart';
 import 'package:flutter/material.dart';
-import '../models/contact.dart';
-import '../database/dao/contact_dao.dart';
 
 class ContactForm extends StatefulWidget {
   @override
@@ -10,8 +9,10 @@ class ContactForm extends StatefulWidget {
 
 class _ContactFormState extends State<ContactForm> {
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _accountNumberController = TextEditingController();
+  final TextEditingController _accountNumberController =
+      TextEditingController();
   final ContactDao _dao = ContactDao();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,16 +23,13 @@ class _ContactFormState extends State<ContactForm> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: TextField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: 'Full name',
-                ),
-                style: TextStyle(
-                  fontSize: 24.0,
-                ),
+            TextField(
+              controller: _nameController,
+              decoration: InputDecoration(
+                labelText: 'Full name',
+              ),
+              style: TextStyle(
+                fontSize: 24.0,
               ),
             ),
             Padding(
@@ -39,7 +37,7 @@ class _ContactFormState extends State<ContactForm> {
               child: TextField(
                 controller: _accountNumberController,
                 decoration: InputDecoration(
-                  labelText: 'Account Number',
+                  labelText: 'Account number',
                 ),
                 style: TextStyle(
                   fontSize: 24.0,
@@ -51,21 +49,18 @@ class _ContactFormState extends State<ContactForm> {
               padding: const EdgeInsets.only(top: 16.0),
               child: SizedBox(
                 width: double.maxFinite,
-                child: ElevatedButton(
+                child: RaisedButton(
                   child: Text('Create'),
                   onPressed: () {
                     final String name = _nameController.text;
-                    final int? accountNumber =
+                    final int accountNumber =
                         int.tryParse(_accountNumberController.text);
-                    if (name != null && accountNumber != null) {
-                      final Contact newContact =
-                          Contact(0, name, accountNumber);
-                      _dao.save(newContact).then((id) => Navigator.pop(context));
-                    }
+                    final Contact newContact = Contact(0, name, accountNumber);
+                    _dao.save(newContact).then((id) => Navigator.pop(context));
                   },
                 ),
               ),
-            ),
+            )
           ],
         ),
       ),
