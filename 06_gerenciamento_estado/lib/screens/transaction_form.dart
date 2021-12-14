@@ -6,6 +6,8 @@ import '../http/webclients/transaction_webclient.dart';
 import '../components/response_dialog.dart';
 import '../components/progress.dart';
 import 'package:uuid/uuid.dart';
+import 'package:provider/provider.dart';
+import '../models/balance.dart';
 
 class TransactionForm extends StatefulWidget {
   final Contact contact;
@@ -134,7 +136,8 @@ class _TransactionFormState extends State<TransactionForm> {
         await _webClient.save(transactionCreated, password).catchError((e) {
       _showFailureMessage(context, message: e.message);
     }, test: (e) => e is HttpException);
-    return transaction;
+      _updateState(context, transaction.value);
+      return transaction;
   }
 
   void _showFailureMessage(
@@ -146,5 +149,9 @@ class _TransactionFormState extends State<TransactionForm> {
         builder: (contextDialog) {
           return FailureDialog(message);
         });
+  }
+
+  _updateState(context, value) {
+      return Provider.of<Balance>(context, listen: false).remove(value);
   }
 }

@@ -10,6 +10,11 @@ class Balance extends ChangeNotifier {
     notifyListeners();
   }
 
+  void remove(double balance) {
+    this.balance -= balance;
+    notifyListeners();
+  }
+  
   @override
   String toString() {
     return 'R\$ $balance';
