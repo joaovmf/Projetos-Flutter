@@ -2,28 +2,42 @@
 import 'package:flutter/material.dart';
 import './contacts_list.dart';
 import './transactions_list.dart';
+import './name.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../models/name.dart';
+import '../components/container.dart';
 
-class Dashboard extends StatelessWidget {
+class DashboardContainer extends BlocContainer {
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => NameCubit("Guilherme"),
+     child: DashboardView(),
+    );
+  }
+}
+
+class DashboardView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        centerTitle: false,
-        title: Text('Dashboard'),
+        // misturando um blocbuilder (que é um observer de eventos) com UI
+        title: BlocBuilder<NameCubit, String>(
+          builder: (context, state) => Text('Welcome $state'),
+        ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Align(
-              alignment: Alignment.center,
-              child: Image.asset('images/bytebank.png'),
-            ),
-            Container(
-              margin: const EdgeInsets.only(bottom: 20.0),
-              height: 130.0,
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Image.asset('images/bytebank_logo.png'),
+          ),
+          SingleChildScrollView(
+            child: Container(
+              height: 120,
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children: <Widget>[
@@ -38,15 +52,38 @@ class Dashboard extends StatelessWidget {
                     onClick: () => _showTransactionsList(context),
                   ),
                   _FeatureItem(
-                    'Simulation',
-                    Icons.description,
-                    onClick: () => print('Simulation clicked'),
+                    'Change name',
+                    Icons.person_outline,
+                    onClick: () => _showChangeName(context),
                   ),
                 ],
               ),
             ),
-          ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showContactsList(BuildContext blocContext) {
+    push(blocContext, ContactsListContainer());
+  }
+
+  void _showChangeName(BuildContext blocContext) {
+    Navigator.of(blocContext).push(
+      MaterialPageRoute(
+        builder: (context) => BlocProvider.value(
+          value: BlocProvider.of<NameCubit>(blocContext),
+          child: NameContainer(),
         ),
+      ),
+    );
+  }
+
+  _showTransactionsList(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => TransactionsList(),
       ),
     );
   }
@@ -57,12 +94,16 @@ class _FeatureItem extends StatelessWidget {
   final IconData icon;
   final Function onClick;
 
-  _FeatureItem(this.name, this.icon, {required this.onClick});
+  _FeatureItem(
+    this.name,
+    this.icon, {
+    required this.onClick,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(8.0),
       child: Material(
         color: Theme.of(context).primaryColor,
         child: InkWell(
@@ -72,13 +113,20 @@ class _FeatureItem extends StatelessWidget {
             width: 150,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Icon(icon, color: Colors.white, size: 24.0),
-                Text(name,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16.0,
-                    )),
+                Icon(
+                  icon,
+                  color: Colors.white,
+                  size: 24.0,
+                ),
+                Text(
+                  name,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16.0,
+                  ),
+                )
               ],
             ),
           ),
@@ -86,14 +134,4 @@ class _FeatureItem extends StatelessWidget {
       ),
     );
   }
-}
-
-void _showContactsList(BuildContext context) {
-  Navigator.of(context)
-      .push(MaterialPageRoute(builder: (context) => ContactList()));
-}
-
-void _showTransactionsList(BuildContext context) {
-  Navigator.of(context)
-      .push(MaterialPageRoute(builder: (context) => TransactionsList()));
 }
