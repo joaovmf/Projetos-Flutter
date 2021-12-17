@@ -4,13 +4,15 @@ import 'package:proj/core/app_colors.dart';
 import 'package:proj/core/app_images.dart';
 import 'package:proj/models/package_model.dart';
 import 'package:proj/models/producer_model.dart';
-import 'package:proj/screens/package_details_screen.dart';
 
 class ProducerDetailsScreen extends StatelessWidget {
 
   final Producer producer;
+  final onPackageDetailsClick;
+
   ProducerDetailsScreen({
-    @required this.producer
+    @required this.producer,
+    this.onPackageDetailsClick,
   });
 
   @override
@@ -24,7 +26,7 @@ class ProducerDetailsScreen extends StatelessWidget {
         title: Text(
           'Detalhe da empresa',
           style: TextStyle(
-            fontWeight: FontWeight.w700
+              fontWeight: FontWeight.w700
           ),
         ),
       ),
@@ -72,11 +74,11 @@ class ProducerDetailsScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
             child: Text(
-              producer.description,
-              style: TextStyle(
-                color: AppColors.darkGrey,
-                fontSize: 18
-              )
+                producer.description,
+                style: TextStyle(
+                    color: AppColors.darkGrey,
+                    fontSize: 18
+                )
             ),
           ),
           Padding(
@@ -90,12 +92,12 @@ class ProducerDetailsScreen extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(20, 5, 20, 0),
-              child: ListView(
-                children: _generatePackageList(context, producer.packages)
-              ),
-            )
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(20, 5, 20, 0),
+                child: ListView(
+                    children: _generatePackageList(context, producer.packages)
+                ),
+              )
           ),
         ],
       ),
@@ -108,13 +110,7 @@ class ProducerDetailsScreen extends StatelessWidget {
       final pack = Package.fromJson(package);
 
       children.add(InkWell(
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => PackageDetailsScreen(
-            package: pack,
-            producer: producer,
-          )),
-        ),
+        onTap: () => onPackageDetailsClick({"package": pack, "producer": producer}),
         child: OrgsPackagesCard(
           title: pack.title,
           price: pack.price,

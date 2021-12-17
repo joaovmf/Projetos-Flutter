@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:proj/router_generator.dart';
+import 'package:nuvigator/next.dart';
+import 'package:proj/router.dart';
 
 void main() {
   runApp(MyApp());
@@ -15,8 +16,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         fontFamily: 'Montserrat',
       ),
-      initialRoute: 'home',
-      onGenerateRoute: RouteGenerator.generateRoute,
+      home: Nuvigator(
+        router: MyRouter(),
+      ),
     );
   }
 }
